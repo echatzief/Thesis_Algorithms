@@ -35,6 +35,10 @@ def main():
   for c in nom_cols:
     le = LabelEncoder()
     df[c] = le.fit_transform(df[c])
+    
+  # Remove the standard deviation = 0 
+  df = df.loc[:, df.std() > 0.0]
+  print(df.head())
 
   # Use the isolation forest to find the anomalies -1: anomaly 1:normal 
   #clf = IsolationForest(n_estimators = 10, max_samples =int(0.2*len(df['time_diff']))+1, contamination = 'auto', behaviour='new')

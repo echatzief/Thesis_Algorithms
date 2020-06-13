@@ -6,4 +6,4 @@ do
 done
 
 python extract_features.py --type train
-python train.py
+python3 train.py

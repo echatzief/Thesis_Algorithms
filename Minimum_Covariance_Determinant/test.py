@@ -1,6 +1,5 @@
 from os import listdir
 from os.path import isfile, join
-from progress.bar import Bar
 from scapy.all import rdpcap,IP,TCP,UDP
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
@@ -8,7 +7,6 @@ import numpy as np
 from sklearn.ensemble import IsolationForest
 import argparse,os
 import pickle
-from sklearn.feature_selection import SelectFromModel
 
 def main():
   
@@ -46,10 +44,11 @@ def main():
   # Use the isolation forest to find the anomalies -1: anomaly 1:normal 
   filename = 'model.sav'
   clf = pickle.load(open(filename,'rb'))
-  df['label']=clf.predict(df) 
-
-  totalNormal = len(df[df['label']==1])
-  totalAnomalies = len(df[df['label']==-1])
+  df['label']=clf.predict(df)
+  print(df) 
+  #os._exit(1)
+  totalNormal = len(df[df['label']==0])
+  totalAnomalies = len(df[df['label']==1])
   print("Normal: "+str(totalNormal))
   print("Anomaly: "+str(totalAnomalies))
   print('Accuracy: '+str(totalAnomalies/float(totalNormal+totalAnomalies)))

@@ -14,7 +14,9 @@ def main():
   # Read all the csv files
   csvPath = "./test_csv"
   csvFiles = [f for f in listdir(csvPath) if isfile(join(csvPath, f))]
-  
+  dfT = pd.read_csv('./processed_csv/processed.csv',index_col=False)
+  dfT = dfT.drop(columns=['label'],axis=0)
+  print(dfT.columns)
   dfs = [] 
   for cv in csvFiles:
     print("CSV Processing: "+cv)
@@ -35,6 +37,10 @@ def main():
     le = LabelEncoder()
     df[c] = le.fit_transform(df[c])
 
+# Remove the standard deviation = 0 
+  df = df[dfT.columns]
+  print(df.head())
+  
   # Use the isolation forest to find the anomalies -1: anomaly 1:normal 
   filename = 'model.sav'
   clf = pickle.load(open(filename,'rb'))

@@ -6,4 +6,4 @@ do
 done
 
 python extract_features.py --type test
-python test.py
+python3 test.py
