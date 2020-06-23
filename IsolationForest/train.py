@@ -11,7 +11,7 @@ import pickle
 from sklearn.neighbors import LocalOutlierFactor
 
 def main():
-  
+
   # Read all the csv files
   csvPath = "./csv_files"
   csvFiles = [f for f in listdir(csvPath) if isfile(join(csvPath, f))]
@@ -31,7 +31,7 @@ def main():
   # Turn every column to numeric
   cols = [c for c in df.columns]
 
-  nom_cols = ['ip_flags','tcp_udp_flags','payload','version']    
+  nom_cols = ['ip_flags','tcp_udp_flags','version']    
   for c in nom_cols:
     le = LabelEncoder()
     df[c] = le.fit_transform(df[c])

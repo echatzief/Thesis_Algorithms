@@ -10,8 +10,8 @@ import argparse,os
 import pickle
 from sklearn.feature_selection import SelectFromModel
 
+
 def main():
-  
   # Read all the csv files
   csvPath = "./test_csv"
   csvFiles = [f for f in listdir(csvPath) if isfile(join(csvPath, f))]

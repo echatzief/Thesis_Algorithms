@@ -9,9 +9,10 @@ from sklearn.ensemble import IsolationForest
 import argparse,os
 import pickle
 from sklearn.neighbors import LocalOutlierFactor
+import requests
+import json
 
 def main():
-  
   # Read all the csv files
   csvPath = "./csv_files"
   csvFiles = [f for f in listdir(csvPath) if isfile(join(csvPath, f))]
@@ -36,13 +37,15 @@ def main():
     le = LabelEncoder()
     df[c] = le.fit_transform(df[c])
     
+
+
   # Remove the standard deviation = 0 
   df = df.loc[:, df.std() > 0.0]
   print(df.head())
 
   # Use the isolation forest to find the anomalies -1: anomaly 1:normal 
   #clf = IsolationForest(n_estimators = 10, max_samples =int(0.2*len(df['time_diff']))+1, contamination = 'auto', behaviour='new')
-  clf = LocalOutlierFactor(contamination='auto',novelty=True)
+  clf = LocalOutlierFactor(n_neighbors=2,contamination='auto',novelty=True)
   clf.fit(df)
   df['label']=clf.predict(df)
 

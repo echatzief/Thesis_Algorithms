@@ -7,10 +7,26 @@ from progress.bar import Bar
 from ExtraFeatures import *
 import argparse,os
 import binascii
+import numpy as np
+import requests
+import json
 
 def main():
-  # Read all the pcap files
 
+   # Fetch all the topics in order to check the type
+  URL = "http://localhost/topics"
+  with open('../env.json', 'r') as myfile:
+    d=myfile.read()
+  headers = json.loads(d)
+  r = requests.get(url = URL ,headers=headers)
+  topics = r.json()
+ 
+  if(r.status_code != 200):
+    print(topics['message'])
+    os._exit(-1)
+  print(topics)
+
+  # Read all the pcap files
   parser = argparse.ArgumentParser(description='Packet sniffer')
   parser.add_argument('--type',type=str,help='Type of use')
   args = parser.parse_args()
@@ -37,13 +53,13 @@ def main():
     tcp_fields = [field.name for field in TCP().fields_desc]
     udp_fields = [field.name for field in UDP().fields_desc]
     dataframe_fields = ip_fields + ['time'] + tcp_fields
-    dataframe_fields = dataframe_fields + ['land'] + ['time_diff'] + ['payload']
+    dataframe_fields = dataframe_fields + ['land'] + ['time_diff'] + ['payload']+['std_dev_payload']
     dataframe_fields = dataframe_fields + ["Avg_syn_flag", "Avg_urg_flag", "Avg_fin_flag", "Avg_ack_flag", "Avg_psh_flag", "Avg_rst_flag", "Avg_DNS_pkt", \
       "Avg_TCP_pkt","Avg_UDP_pkt", "Avg_ICMP_pkt", "Duration_window_flow", "Avg_delta_time", "Min_delta_time", "Max_delta_time", "StDev_delta_time",
       "Avg_pkts_lenght", "Min_pkts_lenght", "Max_pkts_lenght", "StDev_pkts_lenght", "Avg_small_payload_pkt", "Avg_payload", "Min_payload",
       "Max_payload", "StDev_payload", "Avg_DNS_over_TCP"] 
 
-    dataframe_fields_after = ip_fields + ['time'] + tcp_fields + ['land']+['time_diff']+['payload']
+    dataframe_fields_after = ip_fields + ['time'] + tcp_fields + ['land']+['time_diff']+['payload']+['std_dev_payload']
     dataframe_fields_after[dataframe_fields_after.index('flags')] = "ip_flags"
     dataframe_fields_after[dataframe_fields_after.index('flags')] = "tcp_udp_flags"
     dataframe_fields_after[dataframe_fields_after.index('chksum')] = "ip_chksum"
@@ -102,9 +118,33 @@ def main():
       prevDiff = field_values[13]
       pkts.append(packet)
 
-      # payload
-      hexPay = str(binascii.hexlify(bytes(packet[layer_type].payload)))
-      field_values.append(hexPay)
+      # Retrieve topic
+      topic = (str(bytes(packet[layer_type].payload))[::-1][1::]).split('/')[0]
+      topic = "/"+topic[::-1]
+
+      # Retrieve the topic ontology
+      ontologyType = ''
+      for e in topics:
+        if e['name'] == topic:
+          ontologyType = e['topic_ontology']
+          break
+
+      # Check the payload type and add the payload to the csv
+      try:
+        payload = str(bytes(packet[layer_type].payload))[::-1][0]
+        if ontologyType == 'integer':
+          payload = int(payload)
+          field_values.append(int(payload))
+      except ValueError:
+        print('Wrong type of ontology')
+        field_values.append(0)
+
+      # standard deviation to the payload
+      if len(df['payload']) > 0:
+        std_dev_payload = np.std(np.array(df['payload']).astype(int))
+        field_values.append(std_dev_payload)
+      else:
+        field_values.append(0)
 
 
       # Append the extra features

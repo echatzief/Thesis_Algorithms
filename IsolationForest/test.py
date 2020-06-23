@@ -9,6 +9,7 @@ from sklearn.ensemble import IsolationForest
 import argparse,os
 import pickle
 
+
 def main():
   
   # Read all the csv files
@@ -37,10 +38,8 @@ def main():
     le = LabelEncoder()
     df[c] = le.fit_transform(df[c])
 
-# Remove the standard deviation = 0 
+  # Remove the standard deviation = 0 
   df = df[dfT.columns]
-  print(df.head())
-  
   # Use the isolation forest to find the anomalies -1: anomaly 1:normal 
   filename = 'model.sav'
   clf = pickle.load(open(filename,'rb'))
