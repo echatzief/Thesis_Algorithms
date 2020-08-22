@@ -22,7 +22,6 @@ def main():
     dfs.append(pd.read_csv(csvPath+'/'+cv,index_col=False))
   
   df = pd.concat(dfs, ignore_index=True)
-  #df = df.drop('Unnamed: 0', axis=1)
 
   # Process all the csv file
   totalNormal = 0
@@ -36,9 +35,20 @@ def main():
     le = LabelEncoder()
     df[c] = le.fit_transform(df[c])
 
-  # Remove the standard deviation = 0 
+  # Remove the cols with small standard deviation
   df = df.loc[:, df.std() > 0.0]
+
+  # Calculate the correlation matrix
+  corr_matrix = df.corr().abs()
+
+  # Select upper triangle of correlation matrix
+  upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(np.bool))
+
+  # Find index of feature columns with correlation greater than 0.95
+  to_drop = [column for column in upper.columns if any(upper[column] == 1)]
   
+  df = df.drop(df[to_drop],axis=1)
+
   # Use the isolation forest to find the anomalies -1: anomaly 1:normal 
   clf = IsolationForest(n_estimators = 10, max_samples =int(0.8*len(df['time_diff']))+1, contamination = 'auto', behaviour='new')
   clf.fit(df)

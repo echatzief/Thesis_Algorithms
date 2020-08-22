@@ -40,6 +40,7 @@ def main():
 
   # Remove the standard deviation = 0 
   df = df[dfT.columns]
+  
   # Use the isolation forest to find the anomalies -1: anomaly 1:normal 
   filename = 'model.sav'
   clf = pickle.load(open(filename,'rb'))
